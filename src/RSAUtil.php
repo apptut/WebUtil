@@ -19,10 +19,11 @@ class RSAUtil
      * @param $private_key
      * @return null|string
      */
-    public static function encodeByPrivate($content, $private_key, $encrypted = '')
+    public static function encodeByPrivate($content, $private_key)
     {
         //转换为openssl密钥
-        $res = openssl_pkey_get_private(self::formatPriKey($private_key));
+        $encrypted = '';
+        $res = openssl_get_privatekey(self::formatPriKey($private_key));
         $rel = openssl_private_encrypt($content, $encrypted, $res);
         if ($rel) {
             return base64_encode($encrypted);
@@ -37,14 +38,14 @@ class RSAUtil
      * @param $public_key
      * @return bool|null
      */
-    public static function decodeByPublic($content, $public_key, $decoded = '')
+    public static function decodeByPublic($content, $public_key)
     {
-        $res = openssl_pkey_get_public(self::formatPubKey($public_key));
+        $decoded = '';
+        $res = openssl_get_publickey(self::formatPubKey($public_key));
         $rel = openssl_public_decrypt(base64_decode($content), $decoded, $res);
         if ($rel) {
-            return $rel;
+            return $decoded;
         }
-
         return null;
     }
 
