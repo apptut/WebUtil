@@ -69,6 +69,26 @@ class RSAUtil
 
 
     /**
+     * 公约加密私钥解密
+     *
+     * @param $content
+     * @param $private_key
+     * @return null|string
+     */
+    public static function decodeByPrivate($content, $private_key){
+        $decoded = '';
+        $res = openssl_get_privatekey(self::formatPriKey($private_key));
+        $rel = openssl_private_decrypt(base64_decode($content), $decoded, $res);
+        if ($rel) {
+            return $decoded;
+        }
+        return null;
+    }
+
+
+
+
+    /**
      * 格式化私钥
      *
      * $priKey PKCS#1格式的私钥串
