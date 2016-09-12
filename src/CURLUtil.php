@@ -20,15 +20,32 @@ class CURLUtil
      * GET HTTP Request By Curl
      *
      * @param $url
+     * @param $header
+     *
      * @return mixed
      */
-    public static function get($url){
+    public static function get($url, $header = []){
         $curl = curl_init();
         curl_setopt($curl, CURLOPT_URL, $url);
         curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+        self::makeHeader($curl, $header);
         $r = curl_exec($curl);
         curl_close($curl);
         return $r;
+    }
+
+    /**
+     * 添加header
+     *
+     * @param $curl
+     * @param $header
+     */
+    private static function makeHeader($curl, $header){
+        //HTTP请求头中"Accept-Encoding: "的值。支持的编码有"identity"，"deflate"和"gzip"。如果为空字符串""，请求头会发送所有支持的编码类型。
+        curl_setopt($curl,CURLOPT_ENCODING, '');
+        if ($header) {
+            curl_setopt($curl, CURLOPT_HTTPHEADER, $header);
+        }
     }
 
     /**
@@ -36,10 +53,13 @@ class CURLUtil
      *
      * @param $url
      * @param $data
+     * @param $header
+     *
      * @return mixed
      */
-    public static function post($url, $data) {
+    public static function post($url, $data, $header = []) {
         $curl = curl_init();
+        self::makeHeader($curl, $header);
         curl_setopt($curl, CURLOPT_URL, $url);
         curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($curl, CURLOPT_POST, true);
