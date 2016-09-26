@@ -16,6 +16,43 @@ class RSAUtil
      * 公钥加密
      *
      * @param $content
+     * @param $public_key
+     * @return null|string
+     */
+    public static function encodeByPublic($content, $public_key)
+    {
+        $encrypted = '';
+        $res = openssl_get_publickey(self::formatPubKey($public_key));
+        $rel = openssl_public_encrypt($content, $encrypted, $res);
+        if ($rel) {
+            return base64_encode($encrypted);
+        }
+        return null;
+    }
+
+    /**
+     * 公钥解密
+     *
+     * @param $content
+     * @param $public_key
+     * @return bool|null
+     */
+    public static function decodeByPublic($content, $public_key)
+    {
+        $decoded = '';
+        $res = openssl_get_publickey(self::formatPubKey($public_key));
+        $rel = openssl_public_decrypt(base64_decode($content), $decoded, $res);
+        if ($rel) {
+            return $decoded;
+        }
+        return null;
+    }
+
+
+    /**
+     * 私钥加密
+     *
+     * @param $content
      * @param $private_key
      * @return null|string
      */
@@ -31,18 +68,19 @@ class RSAUtil
         return null;
     }
 
+
     /**
      * 私钥解密
      *
      * @param $content
-     * @param $public_key
-     * @return bool|null
+     * @param $private_key
+     * @return null|string
      */
-    public static function decodeByPublic($content, $public_key)
+    public static function decodeByPrivate($content, $private_key)
     {
         $decoded = '';
-        $res = openssl_get_publickey(self::formatPubKey($public_key));
-        $rel = openssl_public_decrypt(base64_decode($content), $decoded, $res);
+        $res = openssl_get_privatekey(self::formatPriKey($private_key));
+        $rel = openssl_private_decrypt(base64_decode($content), $decoded, $res);
         if ($rel) {
             return $decoded;
         }
@@ -66,26 +104,6 @@ class RSAUtil
         $fKey .= "-----END PUBLIC KEY-----";
         return $fKey;
     }
-
-
-    /**
-     * 公约加密私钥解密
-     *
-     * @param $content
-     * @param $private_key
-     * @return null|string
-     */
-    public static function decodeByPrivate($content, $private_key){
-        $decoded = '';
-        $res = openssl_get_privatekey(self::formatPriKey($private_key));
-        $rel = openssl_private_decrypt(base64_decode($content), $decoded, $res);
-        if ($rel) {
-            return $decoded;
-        }
-        return null;
-    }
-
-
 
 
     /**
