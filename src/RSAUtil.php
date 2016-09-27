@@ -13,24 +13,22 @@ namespace WebUtil;
 class RSAUtil
 {
     const KEY_LEN_1024 = 1024;
-    const KEY_LEN_2048 = 2048;
 
     /**
      * 公钥加密
      *
      * @param $content
      * @param $public_key
-     * @param $key_length
      * @return null|string
      */
-    public static function encodeByPublic($content, $public_key, $key_length = self::KEY_LEN_2048)
+    public static function encodeByPublic($content, $public_key)
     {
         $encrypted = '';
         $res = openssl_get_publickey(self::formatPubKey($public_key));
 
         $base64Content = base64_encode($content);
         $total = strlen($base64Content);
-        $maxContentLength = $key_length / 8 - 11;
+        $maxContentLength = self::KEY_LEN_1024 / 8 - 11;
         if ($total > $maxContentLength) {
             $encodeArr = [];
             $step = ceil($total / $maxContentLength);
@@ -44,7 +42,7 @@ class RSAUtil
                 }
                 array_push($encodeArr, base64_encode($encrypted));
             }
-            dd(base64_encode(json_encode($encodeArr)));
+            return base64_encode(json_encode($encodeArr));
         } else {
             $rel = openssl_public_encrypt($content, $encrypted, $res);
             if ($rel) {
@@ -98,16 +96,15 @@ class RSAUtil
      *
      * @param $content
      * @param $private_key
-     * @param $key_length
      * @return null|string
      */
-    public static function encodeByPrivate($content, $private_key, $key_length = self::KEY_LEN_2048)
+    public static function encodeByPrivate($content, $private_key)
     {
         $encrypted = '';
         $res = openssl_get_privatekey(self::formatPriKey($private_key));
         $base64Content = base64_encode($content);
         $total = strlen($base64Content);
-        $maxContentLength = $key_length / 8 - 11;
+        $maxContentLength = self::KEY_LEN_1024 / 8 - 11;
         if ($total > $maxContentLength) {
             $encodeArr = [];
             $step = ceil($total / $maxContentLength);
@@ -121,7 +118,7 @@ class RSAUtil
                 }
                 array_push($encodeArr, base64_encode($encrypted));
             }
-            dd(base64_encode(json_encode($encodeArr)));
+            return base64_encode(json_encode($encodeArr));
         } else {
             $rel = openssl_private_encrypt($content, $encrypted, $res);
             if ($rel) {
