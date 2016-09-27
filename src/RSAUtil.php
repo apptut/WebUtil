@@ -12,21 +12,46 @@ namespace WebUtil;
  */
 class RSAUtil
 {
+    const KEY_LEN_1024 = 1024;
+    const KEY_LEN_2048 = 2048;
+
     /**
      * 公钥加密
      *
      * @param $content
      * @param $public_key
+     * @param $key_length
      * @return null|string
      */
-    public static function encodeByPublic($content, $public_key)
+    public static function encodeByPublic($content, $public_key, $key_length = self::KEY_LEN_2048)
     {
         $encrypted = '';
         $res = openssl_get_publickey(self::formatPubKey($public_key));
-        $rel = openssl_public_encrypt($content, $encrypted, $res);
-        if ($rel) {
-            return base64_encode($encrypted);
+
+        $base64Content = base64_encode($content);
+        $total = strlen($base64Content);
+        $maxContentLength = $key_length / 8 - 11;
+        if ($total > $maxContentLength) {
+            $encodeArr = [];
+            $step = ceil($total / $maxContentLength);
+            for ($i = 0; $i < $step; $i++) {
+                $start = $i * $maxContentLength;
+                $end = $total - $start >= $maxContentLength ? $maxContentLength : $total - $start;
+                $newStr = substr($base64Content, $start, $end);
+                $rel = openssl_public_encrypt($newStr, $encrypted, $res);
+                if (!$rel) {
+                    return null;
+                }
+                array_push($encodeArr, base64_encode($encrypted));
+            }
+            dd(base64_encode(json_encode($encodeArr)));
+        } else {
+            $rel = openssl_public_encrypt($content, $encrypted, $res);
+            if ($rel) {
+                return base64_encode($encrypted);
+            }
         }
+
         return null;
     }
 
@@ -40,10 +65,29 @@ class RSAUtil
     public static function decodeByPublic($content, $public_key)
     {
         $decoded = '';
-        $res = openssl_get_publickey(self::formatPubKey($public_key));
-        $rel = openssl_public_decrypt(base64_decode($content), $decoded, $res);
-        if ($rel) {
-            return $decoded;
+        $decodeString = base64_decode($content);
+
+        if (strpos($decodeString, '[') == 0) {
+            $arr = json_decode($decodeString, true);
+            if (!$arr || !is_array($arr)) {
+                return null;
+            }
+            foreach ($arr as $item) {
+                $fieldDecode = '';
+                $res = openssl_get_publickey(self::formatPubKey($public_key));
+                $rel = openssl_public_decrypt(base64_decode($item), $fieldDecode, $res);
+                if (!$rel) {
+                    return null;
+                }
+                $decoded .= $fieldDecode;
+            }
+            return base64_decode($decoded);
+        } else {
+            $res = openssl_get_publickey(self::formatPubKey($public_key));
+            $rel = openssl_public_decrypt(base64_decode($content), $decoded, $res);
+            if ($rel) {
+                return $decoded;
+            }
         }
         return null;
     }
@@ -54,16 +98,35 @@ class RSAUtil
      *
      * @param $content
      * @param $private_key
+     * @param $key_length
      * @return null|string
      */
-    public static function encodeByPrivate($content, $private_key)
+    public static function encodeByPrivate($content, $private_key, $key_length = self::KEY_LEN_2048)
     {
-        //转换为openssl密钥
         $encrypted = '';
         $res = openssl_get_privatekey(self::formatPriKey($private_key));
-        $rel = openssl_private_encrypt($content, $encrypted, $res);
-        if ($rel) {
-            return base64_encode($encrypted);
+        $base64Content = base64_encode($content);
+        $total = strlen($base64Content);
+        $maxContentLength = $key_length / 8 - 11;
+        if ($total > $maxContentLength) {
+            $encodeArr = [];
+            $step = ceil($total / $maxContentLength);
+            for ($i = 0; $i < $step; $i++) {
+                $start = $i * $maxContentLength;
+                $end = $total - $start >= $maxContentLength ? $maxContentLength : $total - $start;
+                $newStr = substr($base64Content, $start, $end);
+                $rel = openssl_private_encrypt($newStr, $encrypted, $res);
+                if (!$rel) {
+                    return null;
+                }
+                array_push($encodeArr, base64_encode($encrypted));
+            }
+            dd(base64_encode(json_encode($encodeArr)));
+        } else {
+            $rel = openssl_private_encrypt($content, $encrypted, $res);
+            if ($rel) {
+                return base64_encode($encrypted);
+            }
         }
         return null;
     }
@@ -79,10 +142,29 @@ class RSAUtil
     public static function decodeByPrivate($content, $private_key)
     {
         $decoded = '';
-        $res = openssl_get_privatekey(self::formatPriKey($private_key));
-        $rel = openssl_private_decrypt(base64_decode($content), $decoded, $res);
-        if ($rel) {
-            return $decoded;
+        $decodeString = base64_decode($content);
+
+        if (strpos($decodeString, '[') == 0) {
+            $arr = json_decode($decodeString, true);
+            if (!$arr || !is_array($arr)) {
+                return null;
+            }
+            foreach ($arr as $item) {
+                $fieldDecode = '';
+                $res = openssl_get_privatekey(self::formatPriKey($private_key));
+                $rel = openssl_private_decrypt(base64_decode($item), $fieldDecode, $res);
+                if (!$rel) {
+                    return null;
+                }
+                $decoded .= $fieldDecode;
+            }
+            return base64_decode($decoded);
+        } else {
+            $res = openssl_get_privatekey(self::formatPriKey($private_key));
+            $rel = openssl_private_decrypt(base64_decode($content), $decoded, $res);
+            if ($rel) {
+                return $decoded;
+            }
         }
         return null;
     }
