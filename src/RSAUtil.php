@@ -64,7 +64,6 @@ class RSAUtil
     {
         $decoded = '';
         $decodeString = base64_decode($content);
-
         if (strpos($decodeString, '[') === 0) {
             $arr = json_decode($decodeString, true);
             if (!$arr || !is_array($arr)) {
@@ -82,7 +81,7 @@ class RSAUtil
             return base64_decode($decoded);
         } else {
             $res = openssl_get_publickey(self::formatPubKey($public_key));
-            $rel = openssl_public_decrypt(base64_decode($content), $decoded, $res);
+            $rel = openssl_public_decrypt($decodeString, $decoded, $res);
             if ($rel) {
                 return $decoded;
             }
@@ -140,7 +139,6 @@ class RSAUtil
     {
         $decoded = '';
         $decodeString = base64_decode($content);
-
         if (strpos($decodeString, '[') === 0) {
             $arr = json_decode($decodeString, true);
             if (!$arr || !is_array($arr)) {
@@ -158,7 +156,7 @@ class RSAUtil
             return base64_decode($decoded);
         } else {
             $res = openssl_get_privatekey(self::formatPriKey($private_key));
-            $rel = openssl_private_decrypt(base64_decode($content), $decoded, $res);
+            $rel = openssl_private_decrypt($decodeString, $decoded, $res);
             if ($rel) {
                 return $decoded;
             }
