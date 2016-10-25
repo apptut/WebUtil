@@ -65,7 +65,7 @@ class RSAUtil
         $decoded = '';
         $decodeString = base64_decode($content);
 
-        if (strpos($decodeString, '[') == 0) {
+        if (strpos($decodeString, '[') === 0) {
             $arr = json_decode($decodeString, true);
             if (!$arr || !is_array($arr)) {
                 return null;
@@ -141,7 +141,7 @@ class RSAUtil
         $decoded = '';
         $decodeString = base64_decode($content);
 
-        if (strpos($decodeString, '[') == 0) {
+        if (strpos($decodeString, '[') === 0) {
             $arr = json_decode($decodeString, true);
             if (!$arr || !is_array($arr)) {
                 return null;
