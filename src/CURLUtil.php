@@ -69,4 +69,29 @@ class CURLUtil
         return $r;
     }
 
+    /**
+     * post by raw string
+     *
+     * @param $url
+     * @param $data
+     * @param array $header
+     * @return mixed
+     */
+    public static function postByRaw($url, $data, $header = []){
+        $curl = curl_init();
+        self::makeHeader($curl, $header);
+        curl_setopt($curl, CURLOPT_URL, $url);
+        curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($curl, CURLOPT_POST, true);
+
+        if (!is_string($data)) {
+            $data = json_encode($data);
+        }
+
+        curl_setopt($curl, CURLOPT_POSTFIELDS, $data);
+        $r = curl_exec($curl);
+        curl_close($curl);
+        return $r;
+    }
+
 }
